@@ -1,0 +1,2 @@
+$Accesskey = Decrypt-String -encryptedString $inputhash.AccessKey
+$Secretkey = Decrypt-String -encryptedString $inputhash.SecretKey
