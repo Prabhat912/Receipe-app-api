@@ -58,7 +58,7 @@ class ModelTests(TestCase):
 
     def test_create_receipe(self):
         """
-        Test Creating a receipe is successful. 
+        Test Creating a receipe is successful.
         """
         user = get_user_model().objects.create_user(
             'test@example.com',
