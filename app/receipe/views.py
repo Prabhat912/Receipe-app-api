@@ -13,7 +13,7 @@ class ReceipeViewSet(viewsets.ModelViewSet):
     """
     View for Manage Receipe APIs
     """
-    serializer_class = serializers.ReceipeSerializer
+    serializer_class = serializers.ReceipeDetailSerializer
     queryset = Receipe.objects.all()
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -23,3 +23,18 @@ class ReceipeViewSet(viewsets.ModelViewSet):
         Retrieve Receipe for authenticated users
         """
         return self.queryset.filter(user=self.request.user).order_by('-id')
+
+    def get_serializer_class(self):
+        """
+        Return the serializer class for request
+        """
+        if self.action == 'list':
+            return serializers.ReceipeSerializer
+
+        return self.serializer_class
+
+    def perform_create(self, serializer):
+        """
+        Create a new receipe
+        """
+        serializer.save(user=self.request.user)
