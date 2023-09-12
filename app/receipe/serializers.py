@@ -2,7 +2,7 @@
 Serializers for Receipe APIs.
 """
 from rest_framework import serializers
-from core.models import Receipe
+from core.models import Receipe, Tag
 
 
 class ReceipeSerializer(serializers.ModelSerializer):
@@ -23,3 +23,14 @@ class ReceipeDetailSerializer(ReceipeSerializer):
 
     class Meta(ReceipeSerializer.Meta):
         fields = ReceipeSerializer.Meta.fields + ['description']
+
+
+class TagSerializer(serializers.ModelSerializer):
+    """
+    Serializers for Tags
+    """
+
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
+        read_only_fields = ['id']
