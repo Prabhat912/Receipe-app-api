@@ -10,7 +10,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Receipe
+from core.models import Receipe, Tag
 
 from receipe.serializers import ReceipeSerializer, ReceipeDetailSerializer
 
@@ -193,3 +193,89 @@ class PrivateReceipeApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(Receipe.objects.filter(id=receipe.id).exists())
+
+    def test_create_receipe_with_new_tags(self):
+        """Test creating a receipe with new tags."""
+        payload = {
+            'title': 'Thai Prawn Curry',
+            'time_minutes': 30,
+            'price': Decimal('2.50'),
+            'tags': [{'name': 'Thai'}, {'name': 'Dinner'}],
+        }
+        res = self.client.post(RECEIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        receipes = Receipe.objects.filter(user=self.user)
+        self.assertEqual(receipes.count(), 1)
+        receipe = receipes[0]
+        self.assertEqual(receipe.tags.count(), 2)
+        for tag in payload['tags']:
+            exists = receipe.tags.filter(
+                name=tag['name'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
+
+    def test_create_receipe_with_existing_tags(self):
+        """Test creating a receipe with existing tag."""
+        tag_indian = Tag.objects.create(user=self.user, name='Indian')
+        payload = {
+            'title': 'Pongal',
+            'time_minutes': 60,
+            'price': Decimal('4.50'),
+            'tags': [{'name': 'Indian'}, {'name': 'Breakfast'}],
+        }
+        res = self.client.post(RECEIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        receipes = Receipe.objects.filter(user=self.user)
+        self.assertEqual(receipes.count(), 1)
+        receipe = receipes[0]
+        self.assertEqual(receipe.tags.count(), 2)
+        self.assertIn(tag_indian, receipe.tags.all())
+        for tag in payload['tags']:
+            exists = receipe.tags.filter(
+                name=tag['name'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
+
+    def test_create_tag_on_update(self):
+        """Test create tag when updating a receipe."""
+        receipe = create_receipe(user=self.user)
+
+        payload = {'tags': [{'name': 'Lunch'}]}
+        url = detail_url(receipe.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_tag = Tag.objects.get(user=self.user, name='Lunch')
+        self.assertIn(new_tag, receipe.tags.all())
+
+    def test_update_receipe_assign_tag(self):
+        """Test assigning an existing tag when updating a receipe."""
+        tag_breakfast = Tag.objects.create(user=self.user, name='Breakfast')
+        receipe = create_receipe(user=self.user)
+        receipe.tags.add(tag_breakfast)
+
+        tag_lunch = Tag.objects.create(user=self.user, name='Lunch')
+        payload = {'tags': [{'name': 'Lunch'}]}
+        url = detail_url(receipe.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(tag_lunch, receipe.tags.all())
+        self.assertNotIn(tag_breakfast, receipe.tags.all())
+
+    def test_clear_receipe_tags(self):
+        """Test clearing a receipes tags."""
+        tag = Tag.objects.create(user=self.user, name='Dessert')
+        receipe = create_receipe(user=self.user)
+        receipe.tags.add(tag)
+
+        payload = {'tags': []}
+        url = detail_url(receipe.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(receipe.tags.count(), 0)
