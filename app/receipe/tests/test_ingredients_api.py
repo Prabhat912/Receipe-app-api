@@ -10,10 +10,10 @@ from rest_framework.test import APIClient
 
 from core.models import Ingredient
 
-from recipe.serializers import IngredientSerializer
+from receipe.serializers import IngredientSerializer
 
 
-INGREDIENTS_URL = reverse('recipe:ingredient-list')
+INGREDIENTS_URL = reverse('receipe:ingredient-list')
 
 
 def create_user(email='user@example.com', password='testpass123'):
