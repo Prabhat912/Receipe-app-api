@@ -2,7 +2,7 @@
 Serializers for Receipe APIs.
 """
 from rest_framework import serializers
-from core.models import Receipe, Tag,Ingredient
+from core.models import Receipe, Tag, Ingredient
 
 
 class IngredientSerializer(serializers.ModelSerializer):
