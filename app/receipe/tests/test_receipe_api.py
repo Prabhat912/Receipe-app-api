@@ -10,7 +10,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Receipe, Tag
+from core.models import Receipe, Tag, Ingredient
 
 from receipe.serializers import ReceipeSerializer, ReceipeDetailSerializer
 
@@ -279,3 +279,49 @@ class PrivateReceipeApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(receipe.tags.count(), 0)
+
+    def test_create_receipe_with_new_ingredients(self):
+        """Test creating a receipe with new ingredients."""
+        payload = {
+            'title': 'Cauliflower Tacos',
+            'time_minutes': 60,
+            'price': Decimal('4.30'),
+            'ingredients': [{'name': 'Cauliflower'}, {'name': 'Salt'}],
+        }
+        res = self.client.post(RECEIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        receipes = Receipe.objects.filter(user=self.user)
+        self.assertEqual(receipes.count(), 1)
+        receipe = receipes[0]
+        self.assertEqual(receipe.ingredients.count(), 2)
+        for ingredient in payload['ingredients']:
+            exists = receipe.ingredients.filter(
+                name=ingredient['name'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
+
+    def test_create_recipe_with_existing_ingredient(self):
+        """Test creating a new recipe with existing ingredient."""
+        ingredient = Ingredient.objects.create(user=self.user, name='Lemon')
+        payload = {
+            'title': 'Vietnamese Soup',
+            'time_minutes': 25,
+            'price': '2.55',
+            'ingredients': [{'name': 'Lemon'}, {'name': 'Fish Sauce'}],
+        }
+        res = self.client.post(RECEIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        receipes = Receipe.objects.filter(user=self.user)
+        self.assertEqual(receipes.count(), 1)
+        receipe = receipes[0]
+        self.assertEqual(receipe.ingredients.count(), 2)
+        self.assertIn(ingredient, receipe.ingredients.all())
+        for ingredient in payload['ingredients']:
+            exists = receipe.ingredients.filter(
+                name=ingredient['name'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
