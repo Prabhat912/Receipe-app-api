@@ -1,10 +1,22 @@
 """
 Tests for Model
 """
+from unittest.mock import patch
 from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from core import models
+
+
+@patch('core.models.uuid.uuid4')
+def test_receipe_filename_uuid(self, mock_uuid):
+    """
+    Test Generating image path
+    """
+    uuid = 'test-uuid'
+    mock_uuid.return_value = uuid
+    file_path = models.receipe_image_file_path(None, 'example.jpg')
+    self.assertEqual(file_path, f'uploads/receipe/{uuid}.jpg')
 
 
 def create_user(email='user@example.com', password='test123'):
