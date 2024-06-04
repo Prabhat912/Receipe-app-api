@@ -2,12 +2,12 @@
 Views for Receipe APIs
 """
 from drf_spectacular.utils import (
-    # type: ignore
     extend_schema_view,
     extend_schema,
     OpenApiParameter,
     OpenApiTypes,
-    )
+)
+
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response

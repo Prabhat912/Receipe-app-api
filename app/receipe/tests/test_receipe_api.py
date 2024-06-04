@@ -374,7 +374,7 @@ class PrivateReceipeApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(receipe.ingredients.count(), 0)
-    
+
     def test_filter_by_tags(self):
         """
         Test Filtering Receipes by tags
@@ -388,9 +388,9 @@ class PrivateReceipeApiTests(TestCase):
         r2.tags.add(tag2)
         r3 = create_receipe(user=self.user, title='Fish and Chip')
 
-        params = {'tags':f'{tag1.id},{tag2.id}'}
+        params = {'tags': f'{tag1.id},{tag2.id}'}
         res = self.client.get(RECEIPES_URL, params)
-        
+
         s1 = ReceipeSerializer(r1)
         s2 = ReceipeSerializer(r2)
         s3 = ReceipeSerializer(r3)
@@ -398,7 +398,7 @@ class PrivateReceipeApiTests(TestCase):
         self.assertIn(s1.data, res.data)
         self.assertIn(s2.data, res.data)
         self.assertNotIn(s3.data, res.data)
-    
+
     def test_filter_by_ingredients(self):
         """
         Test Filtering Receipes by ingredients
@@ -408,13 +408,13 @@ class PrivateReceipeApiTests(TestCase):
         in1 = Ingredient.objects.create(user=self.user, name='Feta Cheese')
         in2 = Ingredient.objects.create(user=self.user, name='Chicken')
 
-        r1.tags.add(in1)
-        r2.tags.add(in2)
+        r1.ingredients.add(in1)
+        r2.ingredients.add(in2)
         r3 = create_receipe(user=self.user, title='Fish and Chip')
 
-        params = {'ingredients':f'{in1.id},{in2.id}'}
+        params = {'ingredients': f'{in1.id},{in2.id}'}
         res = self.client.get(RECEIPES_URL, params)
-        
+
         s1 = ReceipeSerializer(r1)
         s2 = ReceipeSerializer(r2)
         s3 = ReceipeSerializer(r3)
