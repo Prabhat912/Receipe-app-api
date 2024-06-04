@@ -2,6 +2,7 @@
 Views for Receipe APIs
 """
 from drf_spectacular.utils import (
+    # type: ignore
     extend_schema_view,
     extend_schema,
     OpenApiParameter,
