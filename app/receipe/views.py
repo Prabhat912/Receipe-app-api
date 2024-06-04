@@ -7,7 +7,6 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiTypes,
     )
-
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -18,17 +17,17 @@ from core.models import Receipe, Tag, Ingredient
 from receipe import serializers
 
 @extend_schema_view(
-    list = extend_schema(
-        parameters = [
+    list=extend_schema(
+        parameters=[
             OpenApiParameter(
                 'tags',
                 OpenApiTypes.STR,
-                description = 'Comma Seperated List of tag IDs to filter',
+                description='Comma Seperated List of tag IDs to filter',
             ),
             OpenApiParameter(
                 'ingredients',
                 OpenApiTypes.STR,
-                description = 'Comma Seperated list of Ingredients to filter',
+                description='Comma Seperated list of Ingredients to filter',
             )
         ]
     )
@@ -42,7 +41,7 @@ class ReceipeViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def _params_to_ints(self,qs):
+    def _params_to_ints(self, qs):
         """
         Convert a list of string to integers
         """
@@ -64,7 +63,9 @@ class ReceipeViewSet(viewsets.ModelViewSet):
             ingredients_ids = self._params_to_ints(ingredients)
             queryset = queryset.filter(ingredients__id__in=ingredients_ids)
 
-        return queryset.filter(user=self.request.user).order_by('-id').distinct()
+        return queryset.filter(
+            user=self.request.user
+            ).order_by('-id').distinct()
 
     def get_serializer_class(self):
         """
